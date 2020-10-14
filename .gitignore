@@ -23,6 +23,9 @@ bld/
 # CLion/IntelliJ IDEA
 .idea/
 
+# Qt-Creator files
+build-*/
+*.pro.user
 
 # manual cmake build ignores
 build/
