@@ -69,11 +69,28 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   // You'll need the arm length parameter L, and the drag/thrust ratio kappa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  
+  // Arm length projected on the x, y axes 
+  const float l = L / sqrtf(2.0f);
 
-  cmd.desiredThrustsN[0] = mass * 9.81f / 4.f; // front left
-  cmd.desiredThrustsN[1] = mass * 9.81f / 4.f; // front right
-  cmd.desiredThrustsN[2] = mass * 9.81f / 4.f; // rear left
-  cmd.desiredThrustsN[3] = mass * 9.81f / 4.f; // rear right
+  // TODO: Remove this when fixing altitude control
+  collThrustCmd = mass * 9.81;
+    
+  const float cBar = collThrustCmd;    //< κω₁² + κω₂² + κω₃² + κω₄²
+  const float pBar = momentCmd.x / l;  //< κω₁² - κω₂² + κω₃² - κω₄²
+  const float qBar = momentCmd.y / l;  //< κω₁² + κω₂² - κω₃² - κω₄²
+  const float rBar = momentCmd.z;      //< κω₁² - κω₂² - κω₃² + κω₄²
+
+  // Inverted the linear equations above to get the  
+  const float kOmega1sq = 0.25f * (cBar + pBar + qBar + rBar);
+  const float kOmega2sq = kOmega1sq - 0.5f * (pBar + rBar);
+  const float kOmega3sq = kOmega1sq - 0.5f * (qBar + rBar);
+  const float kOmega4sq = kOmega1sq - 0.5f * (pBar + qBar);
+
+  cmd.desiredThrustsN[0] = kOmega1sq; // front left
+  cmd.desiredThrustsN[1] = kOmega2sq; // front right
+  cmd.desiredThrustsN[2] = kOmega3sq; // rear left
+  cmd.desiredThrustsN[3] = kOmega4sq; // rear right
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -98,7 +115,8 @@ V3F QuadControl::BodyRateControl(V3F pqrCmd, V3F pqr)
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
-  
+  const V3F pqrBar = kpPQR * (pqrCmd - pqr);
+  momentCmd = pqrBar * V3F(Ixx, Iyy, Izz); 
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -129,7 +147,16 @@ V3F QuadControl::RollPitchControl(V3F accelCmd, Quaternion<float> attitude, floa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  const float bXAct = R(0, 2);
+  const float bYAct = R(1, 2);
+  const float bXCmd = (mass * accelCmd.x) / collThrustCmd;
+  const float bYCmd = (mass * accelCmd.y) / collThrustCmd;
 
+  const float bXDot = kpBank * (bXCmd - bXAct);
+  const float bYDot = kpBank * (bYCmd - bYAct);
+
+  pqrCmd.x = (R(1, 0) * bXDot - R(0, 0) * bYDot) / R(2, 2);
+  pqrCmd.y = (R(1, 1) * bXDot - R(0, 1) * bYDot) / R(2, 2);
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
