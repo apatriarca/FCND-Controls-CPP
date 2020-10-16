@@ -195,10 +195,13 @@ float QuadControl::AltitudeControl(float posZCmd, float velZCmd, float posZ, flo
   // Limit commanded velocity to maximum vertical speeds
   velZCmd = CONSTRAIN(velZCmd, -maxAscentRate, maxDescentRate);
 
-  // PD controller for altitude acceleration
-  const float posTerm = kpPosZ * (posZCmd - posZ);
+  // PID controller for altitude acceleration
+  const float errPos = posZCmd - posZ;
+  integratedAltitudeError += errPos * dt;
+  const float intTerm = KiPosZ * integratedAltitudeError;
+  const float posTerm = kpPosZ * errPos;
   const float velTerm = kpVelZ * (velZCmd - velZ);
-  const float uBar = accelZCmd + posTerm + velTerm;
+  const float uBar = accelZCmd + intTerm + posTerm + velTerm;
 
   // Compute thrust from acceleration (thrust is positive when moving up)
   thrust = mass * (CONST_GRAVITY - uBar) / R(2, 2); 
