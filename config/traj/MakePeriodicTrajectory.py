@@ -1,4 +1,5 @@
-import math;
+import math
+import numpy as np
 
 def fmt(value):
     return "%.3f" % value
@@ -12,31 +13,16 @@ phase=[0,0,0]
 amp = [1,0.4,.5]
 center = [0, 0, -2]
 
-with open('FigureEight.txt', 'w') as the_file:
-    t=0;
-    px = 0;
-    py = 0;
-    pz = 0;
-    while t <= maxtime:
-        x = math.sin(t * 2 * math.pi / period[0] + phase[0]) * radius * amp[0] + center[0];
-        y = math.sin(t * 2 * math.pi / period[1] + phase[1]) * radius * amp[1] + center[1];
-        z = math.sin(t * 2 * math.pi / period[2] + phase[2]) * radius * amp[2] + center[2];
-        the_file.write(fmt(t) + "," + fmt(x) + "," + fmt(y) + "," + fmt(z));
-		vx = 0;
-		vy = 0;
-		vz = 0;
-		######## BEGIN STUDENT CODE
-		
-		######## END STUDENT CODE
-		the_file.write("," + fmt(vx) + "," + fmt(vy) + "," + fmt(vz));
-		######## EXAMPLE SOLUTION
-        #the_file.write("," + fmt((x-px)/timestep) + "," + fmt((y-py)/timestep) + "," + fmt((z-pz)/timestep));
-		#px = x;
-        #py = y;
-        #pz = z;
-		######## END EXAMPLE SOLUTION
-		
-        the_file.write("\n");
-        
-        t += timestep;
-            
+t = np.arange(0, maxtime, timestep)
+x = np.sin(t * 2 * np.pi / period[0] + phase[0]) * radius * amp[0] + center[0]
+y = np.sin(t * 2 * np.pi / period[1] + phase[1]) * radius * amp[1] + center[1]
+z = np.sin(t * 2 * np.pi / period[2] + phase[2]) * radius * amp[2] + center[2]
+vx = 2 * np.pi * amp[0] * radius * np.cos(t * 2 * np.pi / period[0] + phase[0]) / period[0]
+vy = 2 * np.pi * amp[1] * radius * np.cos(t * 2 * np.pi / period[1] + phase[1]) / period[1]
+vz = 2 * np.pi * amp[2] * radius * np.cos(t * 2 * np.pi / period[2] + phase[2]) / period[2]
+
+with open('FigureEightFF.txt', 'w') as the_file:
+    for i in range(t.size):
+        the_file.write(fmt(t[i]) + "," + fmt(x[i]) + "," + fmt(y[i]) + "," + fmt(z[i]))
+        the_file.write("," + fmt(vx[i]) + "," + fmt(vy[i]) + "," + fmt(vz[i]))
+        the_file.write("\n");    
