@@ -73,21 +73,21 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   // Arm length projected on the x, y axes 
   const float l = L / sqrtf(2.0f);
     
-  const float cBar = collThrustCmd;         //< ω₁² + ω₂² + ω₃² + ω₄²
-  const float pBar = momentCmd.x / l;       //< ω₁² - ω₂² + ω₃² - ω₄²
-  const float qBar = momentCmd.y / l;       //< ω₁² + ω₂² - ω₃² - ω₄²
-  const float rBar = - momentCmd.z / kappa; //< ω₁² - ω₂² - ω₃² + ω₄²
+  const float cBar = collThrustCmd;         //< kω₁² + kω₂² + kω₃² + kω₄²
+  const float pBar = momentCmd.x / l;       //< kω₁² - kω₂² + kω₃² - kω₄²
+  const float qBar = momentCmd.y / l;       //< kω₁² + kω₂² - kω₃² - kω₄²
+  const float rBar = - momentCmd.z / kappa; //< kω₁² - kω₂² - kω₃² + kω₄²
 
   // Inverted the linear equations above to get the  
-  float omega1sq = 0.25f * (cBar + pBar + qBar + rBar);
-  float omega2sq = omega1sq - 0.5f * (pBar + rBar);
-  float omega3sq = omega1sq - 0.5f * (qBar + rBar);
-  float omega4sq = omega1sq - 0.5f * (pBar + qBar);
+  float kOmega1sq = 0.25f * (cBar + pBar + qBar + rBar);
+  float kOmega2sq = kOmega1sq - 0.5f * (pBar + rBar);
+  float kOmega3sq = kOmega1sq - 0.5f * (qBar + rBar);
+  float kOmega4sq = kOmega1sq - 0.5f * (pBar + qBar);
 
-  cmd.desiredThrustsN[0] = CONSTRAIN(omega1sq, minMotorThrust, maxMotorThrust); // front left
-  cmd.desiredThrustsN[1] = CONSTRAIN(omega2sq, minMotorThrust, maxMotorThrust); // front right
-  cmd.desiredThrustsN[2] = CONSTRAIN(omega3sq, minMotorThrust, maxMotorThrust); // rear left
-  cmd.desiredThrustsN[3] = CONSTRAIN(omega4sq, minMotorThrust, maxMotorThrust); // rear right
+  cmd.desiredThrustsN[0] = CONSTRAIN(kOmega1sq, minMotorThrust, maxMotorThrust); // front left
+  cmd.desiredThrustsN[1] = CONSTRAIN(kOmega2sq, minMotorThrust, maxMotorThrust); // front right
+  cmd.desiredThrustsN[2] = CONSTRAIN(kOmega3sq, minMotorThrust, maxMotorThrust); // rear left
+  cmd.desiredThrustsN[3] = CONSTRAIN(kOmega4sq, minMotorThrust, maxMotorThrust); // rear right
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
