@@ -8,6 +8,8 @@
 #include "BaseController.h"
 #include "Math/Mat3x3F.h"
 
+#include <math.h>
+
 #ifdef __PX4_NUTTX
 #include <systemlib/param/param.h>
 #endif
@@ -277,7 +279,7 @@ float QuadControl::YawControl(float yawCmd, float yaw)
 
   // Compute minimal angle difference
   float yawErr = yawCmd - yaw;
-  yawErr = fmodf(yawErr + M_PIf32, 2.0f * M_PIf32) - M_PIf32;
+  yawErr = fmodf(yawErr + (float)M_PI, 2.0f * (float)M_PI) - (float)M_PI;
 
   // P Controller for yaw rate
   yawRateCmd = kpYaw * yawErr;
